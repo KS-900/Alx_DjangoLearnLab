@@ -1,6 +1,6 @@
 ## Update a book
 ** Command:**
- book.title = "1988"
+ book.title = "Nineteen Eighty-Four"
 >>> book.save()
 >>> updated_book = Book.objects.get(id=1)
 >>> print(updated_book.title)
