@@ -1,6 +1,6 @@
 ## Retrieve a book
 ** Command:**
- Book.objects.all()
+Book.objects.all()
 
 
 ** Expected Output:**
