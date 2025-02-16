@@ -1,6 +1,7 @@
 ## Create a book
 ** Command:**
-  book.delete()
+from bookshelf.models import Book
+book.delete()
 
 ** Expected Output:**
 (1, {'bookshelf.Book': 1})
