@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 from .models import Book 
 from .models import Library
-from django.views.generic import DetailView
+from django.views.generic.detail import DetailView
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth import login
@@ -70,7 +70,7 @@ def add_book(request):
     pass
 
 @permission_required('relationship_app.can_change_book')
-def change_book(request):
+def edit_book(request):
 
     pass
 
