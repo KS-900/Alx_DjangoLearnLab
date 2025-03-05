@@ -18,9 +18,8 @@ class CustomUser(AbstractUser):
     
     def __str__(self):
         return self.username
-
     
-class CustomUserManger(BaseUserManager):
+class CustomUserManager(BaseUserManager):
     def create_user(self, username, email, password=None, **extra_fields):
         if not email:
             raise ValueError("The Email field must be set")
