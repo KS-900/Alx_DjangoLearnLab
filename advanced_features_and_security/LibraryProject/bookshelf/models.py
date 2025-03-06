@@ -9,6 +9,13 @@ class Book(models.Model):
     title = models.CharField(max_length= 200)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     publication_year =models.PositiveIntegerField() 
+
+    class Meta:
+        permissions = [
+            ("can_create", "Can create books"),
+            ("can_edit", "Can edit books"),
+            ("cab_delete", "Can delete books"),
+        ]
     def __str__(self):
         return self.title
     
