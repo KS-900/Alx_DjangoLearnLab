@@ -14,7 +14,7 @@ class Book(models.Model):
         permissions = [
             ("can_create", "Can create books"),
             ("can_edit", "Can edit books"),
-            ("cab_delete", "Can delete books"),
+            ("can_delete", "Can delete books"),
         ]
     def __str__(self):
         return self.title
