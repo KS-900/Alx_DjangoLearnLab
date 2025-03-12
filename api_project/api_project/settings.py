@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-bww=0^a-c&(8#0@d$^6ttv5-mc*=dxl03uqz7j262(u0gv17t3
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+'rest_framework.permissions.IsAuthenticated'
 
 # Application definition
 
