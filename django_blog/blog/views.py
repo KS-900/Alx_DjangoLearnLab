@@ -1,11 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse, HttpResponse
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Post
 
 def home(request):
@@ -42,61 +40,59 @@ def user_logout(request):
 
 class PostListView(ListView):
     model = Post
+    template_name = 'blog/post_list.html'
+    context_object_name = 'posts'
+    ordering = ['-published_date']  # Show newest posts first
 
-    def render_to_response(self, context, **response_kwargs):
-        posts = list(self.get_queryset().values('id', 'title', 'content', 'published_date', 'author_id'))
-        return JsonResponse({'posts': posts}, safe=False)
-    
+# DetailView: Show a single blog post
 class PostDetailView(DetailView):
     model = Post
+    template_name = 'blog/post_detail.html'
 
-    def render_to_response(self, context, **response_kwargs):
-        post = {
-            'id': self.object.id,
-            'title': self.object.title,
-            'content': self.object.content,
-            'published_date': self.object.published_date,
-            'author_id': self.object.author_id
-        }
-        return JsonResponse({'post': post}, safe=False)
-    
+# CreateView: Allow users to create a new post
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     fields = ['title', 'content']
+    template_name = 'blog/post_form.html'
 
     def form_valid(self, form):
-        form.instance.author = self.request.user
-        post = form.save()
-        return JsonResponse({'message': 'Post created successfully!', 'post_id': post.id}, status=201)
+        form.instance.author = self.request.user  # Assign current user as the author
+        return super().form_valid(form)
 
-    def form_invalid(self, form):
-        return JsonResponse({'errors': form.errors}, status=400)
-    
+# UpdateView: Allow authors to edit their posts
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     fields = ['title', 'content']
+    template_name = 'blog/post_form.html'
 
     def form_valid(self, form):
-        post = form.save()
-        return JsonResponse({'message': 'Post updated successfully!', 'post_id': post.id}, status=200)
-
-    def form_invalid(self, form):
-        return JsonResponse({'errors': form.errors}, status=400)
+        form.instance.author = self.request.user
+        return super().form_valid(form)
 
     def test_func(self):
         post = self.get_object()
-        return self.request.user == post.author
+        return self.request.user == post.author  # Only the post author can edit
 
+# DeleteView: Allow authors to delete their posts
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
-    success_url = reverse_lazy('post-list')
-
-    def delete(self, request, *args, **kwargs):
-        post = self.get_object()
-        post.delete()
-        return JsonResponse({'message': 'Post deleted successfully!'}, status=200)
+    template_name = 'blog/post_confirm_delete.html'
+    success_url = reverse_lazy('post-list')  # Redirect to home after deletion
 
     def test_func(self):
         post = self.get_object()
-        return self.request.user == post.author
-
+        return self.request.user == post.author  # Only the post author can delete
+    
+def add_comment(request, pk):
+    post = Post.objects.get(pk=pk)
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.author = request.user
+            comment.save()
+            return redirect('post-detail', pk=post.pk)
+    else:
+        form = CommentForm()
+    return render(request, 'blog/add_comment.html', {'form': form})
