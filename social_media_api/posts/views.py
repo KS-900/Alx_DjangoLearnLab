@@ -2,6 +2,19 @@ from django.shortcuts import render
 from rest_framework import viewsets, permissions, filters
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from .models import Post
+from .serializers import PostSerializer
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_feed(request):
+    user = request.user
+    followed_users = user.following.all()
+    posts = Post.objects.filter(author__in=followed_users).order_by('-created_at')
+    serializer = PostSerializer(posts, many=True)
+    return (serializer.data)
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
